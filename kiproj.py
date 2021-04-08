@@ -165,7 +165,7 @@ def setup():
     pcb_file = os.path.join(kicad_dir, "temp.kicad_pcb")
     pretty_dir = os.path.join(kicad_proj_fp_lib_dir, "temp.pretty")
 
-    # Initialize project name
+    # Initialize project variables
     project_name = "temp"
     project_title = ""
     project_rev = ""
@@ -319,19 +319,21 @@ def setup():
 # config()
 ###############################################
 def config():
-    project_name = "P-001" #input("Project Name: ")
-    title = "PROTIS 1" #input("Title: ")
-    rev = "0" #input("Revision: ")
-    company = "Mimmotronics" #input("Company Name: ")
-    sheet1 = "Overview" #input("Sheet 1: ")
+    print("Please provide the following project parameters:\nProject ID, Title, Subtitle, Revision, and Company\n")
+    project_id = input("Project ID: ")
+    title = input("Title: ")
+    subtitle1 = input("Subtitle: ")
+    rev = input("Revision: ")
+    company = input("Company Name: ")
+    print("\n")
 
     with open(config_file, 'w') as cfg:
-        cfg.write(f"PROJECT_NAME='{project_name}'\n")
+        cfg.write(f"PROJECT_NAME='{project_id}'\n")
         cfg.write(f"TITLE='{title}'\n")
         cfg.write(f"REV='{rev}'\n")
         cfg.write(f"COMPANY='{company}'\n")
         cfg.write(f"COMMENT1='{title}'\n")
-        cfg.write(f"COMMENT2='{sheet1}'\n")
+        cfg.write(f"COMMENT2='{subtitle1}'\n")
         cfg.write("COMMENT3=''\n")
         cfg.write("COMMENT4=''\n")
         cfg.write(f"DATE='{today_date}'")
