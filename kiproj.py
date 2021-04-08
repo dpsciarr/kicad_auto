@@ -1,5 +1,6 @@
 import os
 import sys
+from datetime import datetime
 
 # Working Directory
 pwd = os.path.dirname(os.path.realpath(__file__))
@@ -16,6 +17,8 @@ kicad_proj_fp_lib_dir = os.path.join(kicad_dir, "libs/footprints/")
 kicad_proj_models_lib_dir = os.path.join(kicad_dir, "libs/models/")
 kicad_proj_sym_lib_table = os.path.join(kicad_dir, "sym-lib-table")
 kicad_proj_fp_lib_table = os.path.join(kicad_dir, "fp-lib-table")
+
+today_date = datetime.today().strftime('%Y-%m-%d')
 
 ###############################################
 # clean()
@@ -59,6 +62,7 @@ def clean():
 
             print("Done")
 
+        # Cleans schematic file (.sch)
         with open(os.path.join(kicad_dir, "temp.sch"), 'r+') as sch:
             sch_contents = sch.read()
             print("Cleaning schematic file...")
@@ -91,6 +95,39 @@ def clean():
             sch.close()
             print("Done")
         
+        with open(os.path.join(kicad_dir, "temp.kicad_pcb"), 'r+') as pcb:
+            pcb_contents = pcb.read()
+            print("Cleaning pcb file...")
+            lines = pcb_contents.split('\n')
+            new_text = ""
+            for line in lines:
+                if line != "":
+                    if "(title \"" in line:
+                        new_text += "    (title \"PROJECT_TITLE\")\n"
+                    elif "(date " in line:
+                        new_text += "    (date DATE)\n"
+                    elif "(rev " in line:
+                        new_text += "    (rev REV)\n"
+                    elif "(company " in line:
+                        new_text += "    (company COMPANY)\n"
+                    elif "(comment 1 \"" in line:
+                        new_text += "    (comment 1 \"COMMENT1\""
+                    elif "(comment 2 \"" in line:
+                        new_text += "    (comment 2 \"COMMENT2\""
+                    elif "(comment 3 \"" in line:
+                        new_text += "    (comment 3 \"COMMENT3\""
+                    elif "(comment 4 \"" in line:
+                        new_text += "    (comment 4 \"COMMENT4\""
+                    else:
+                        new_text += (line+"\n")
+            pcb.seek(0)
+            pcb.truncate(0)
+            pcb.write(new_text)
+            pcb.close()
+            print("Done")
+                    
+        
+        # Cleans symbol library table file
         with open(kicad_proj_sym_lib_table, 'r+') as slt:
             print("Cleaning symbol library table...")
             slt_contents = slt.read()
@@ -102,6 +139,7 @@ def clean():
             slt.close()
             print("Done")
         
+        # Cleans footprint library table file
         with open(kicad_proj_fp_lib_table, 'r+') as flt:
             print("Cleaning footprint library table...")
             flt_contents = flt.read()
@@ -130,6 +168,12 @@ def setup():
     # Initialize project name
     project_name = "temp"
     project_title = ""
+    project_rev = ""
+    project_company = ""
+    project_comment1 = ""
+    project_comment2 = ""
+    project_comment3 = ""
+    project_comment4 = ""
 
     # Configures the .sch file for Title Block population and page settings
     if os.path.exists(sch_file):
@@ -155,24 +199,50 @@ def setup():
                                 project_title = val
                                 sch_contents=sch_contents.replace("title", val)
                             elif field == "REV":
+                                project_rev = val
                                 sch_contents=sch_contents.replace("rev", val)
                             elif field == "COMPANY":
+                                project_company = val
                                 sch_contents=sch_contents.replace("company", val)
                             elif field == "COMMENT1":
+                                project_comment1 = val
                                 sch_contents=sch_contents.replace("comment1", val)
                             elif field == "COMMENT2":
+                                project_comment2 = val
                                 sch_contents=sch_contents.replace("comment2", val)
                             elif field == "COMMENT3":
+                                project_comment3 = val
                                 sch_contents=sch_contents.replace("comment3", val)
                             elif field == "COMMENT4":
+                                project_comment4 = val
                                 sch_contents=sch_contents.replace("comment4", val)
-                            elif field == "DATE":
-                                sch_contents=sch_contents.replace("date", val)
+                            else:
+                                sch_contents=sch_contents.replace("date", today_date)
                 sch.seek(0)
                 sch.truncate(0)
                 sch.write(sch_contents)
                 sch.close()
             cfg.close()
+        print("Done")
+    
+    # Configures the .kicad_pcb file for Title Block population and page settings
+    if os.path.exists(pcb_file):
+        print("Configuring PCBNew file...")
+        with open(pcb_file, 'r+') as pcb:
+            pcb_contents = pcb.read()
+            pcb_contents = pcb_contents.replace("PROJECT_TITLE", project_title)
+            pcb_contents = pcb_contents.replace("DATE", today_date)
+            pcb_contents = pcb_contents.replace("REV", project_rev)
+            pcb_contents = pcb_contents.replace("COMPANY", project_company)
+            pcb_contents = pcb_contents.replace("COMMENT1", project_comment1)
+            pcb_contents = pcb_contents.replace("COMMENT2", project_comment2)
+            pcb_contents = pcb_contents.replace("COMMENT3", project_comment3)
+            pcb_contents = pcb_contents.replace("COMMENT4", project_comment4)
+            
+            pcb.seek(0)
+            pcb.truncate(0)
+            pcb.write(pcb_contents)
+            pcb.close()
         print("Done")
 
     # Renames project and library folders if renamed by configuration file
@@ -254,7 +324,6 @@ def config():
     rev = "0" #input("Revision: ")
     company = "Mimmotronics" #input("Company Name: ")
     sheet1 = "Overview" #input("Sheet 1: ")
-    date = "2021-04-08" #input("Date (YYYY-MM-DD): ")
 
     with open(config_file, 'w') as cfg:
         cfg.write(f"PROJECT_NAME='{project_name}'\n")
@@ -265,7 +334,7 @@ def config():
         cfg.write(f"COMMENT2='{sheet1}'\n")
         cfg.write("COMMENT3=''\n")
         cfg.write("COMMENT4=''\n")
-        cfg.write(f"DATE='{date}'")
+        cfg.write(f"DATE='{today_date}'")
         
         cfg.close()
 
