@@ -10,7 +10,11 @@ config_file = os.path.join(pwd, "config.txt")
 # KiCAD Project Folder
 kicad_dir = os.path.join(pwd, "kicad_proj/")
 
-bom_file = os.path.join(pwd, "bom/bom_template.csv")
+# KiCAD Project-Specific Symbols Library
+kicad_proj_symbols_lib_dir = os.path.join(kicad_dir, "libs/symbols/")
+kicad_proj_fp_lib_dir = os.path.join(kicad_dir, "libs/footprints/")
+kicad_proj_models_lib_dir = os.path.join(kicad_dir, "libs/models/")
+kicad_proj_sym_lib_table = os.path.join(kicad_dir, "sym_lib_table")
 
 ###############################################
 # clean()
@@ -77,12 +81,15 @@ def setup():
     # BOM file
     bom_file = os.path.join(pwd, "bom/bom_template.csv")
 
+    # Creating relevant KiCad paths
     pro_file = os.path.join(kicad_dir, "temp.pro")
     sch_file = os.path.join(kicad_dir, "temp.sch")
     pcb_file = os.path.join(kicad_dir, "temp.kicad_pcb")
 
+    # Initialize project name
     project_name = "temp"
 
+    # Configures the .sch file for Title Block population and page settings
     if os.path.exists(sch_file):
         print("Configuring EESchema file...")
         with open(config_file, 'r') as cfg:
@@ -125,7 +132,7 @@ def setup():
             cfg.close()
         print("Done")
 
-
+    # Renames project and library folders if renamed by configuration file
     if project_name != "temp":
         print("Renaming project files...")
         for f in os.listdir(kicad_dir):
@@ -137,15 +144,41 @@ def setup():
                     print("Renamed:\n\t", os.path.join(kicad_dir, f), " to ", newName)
                 except Exception as e:
                     print("Exception:", e)
+
+        print("Done")    
+        print("Renaming library files...")
+        for f in os.listdir(kicad_proj_symbols_lib_dir):
+            if f[:4] == "temp":
+                fsplit = f.split(".")
+                newName = os.path.join(kicad_proj_symbols_lib_dir, project_name + "." + fsplit[1])
+                try:
+                    os.rename(os.path.join(kicad_proj_symbols_lib_dir, f), newName)
+                    print("Renamed:\nOLD:", os.path.join(kicad_proj_symbols_lib_dir, f), "\nNEW:", newName)
+                except Exception as e:
+                    print("Exception:", e)
+
         print("Done")
+    
+        # Update sym_lib_table
+        if os.path.exists(kicad_proj_sym_lib_table):
+            print(f"Updating symbol library table with project name {project_name}...")
+            with open(kicad_proj_sym_lib_table, 'r+') as slt:
+                slt_contents = slt.read()
+                slt_contents = slt_contents.replace("PROJECT_NAME", project_name)
+                slt.seek(0)
+                slt.truncate(0)
+                slt.write(slt_contents)
+                slt.close()
+            print("Done")
 
 
-if os.path.exists(bom_file):
-    print("Initializing BOM Template")
-    with open(bom_file, 'w') as bom:
-        bom.write("Item #,Designator,Qty.,Description,Manufacturer,Mfr Part Number")
-        bom.close()
-    print("Done")
+    # Initializes a BOM CSV with basic headers to be opened in your favorite spreadsheet editor
+    if os.path.exists(bom_file):
+        print("Initializing BOM Template")
+        with open(bom_file, 'w') as bom:
+            bom.write("Item #,Designator,Qty.,Description,Manufacturer,Mfr Part Number")
+            bom.close()
+        print("Done")
 
 ###############################################
 # config()
