@@ -1,33 +1,16 @@
 PYTHON = python3
 
-.PHONY = setup config clean
+FOLDERS = assembly_outputs bom datasheets docs fab_outputs freecad_outputs images pdf_outputs software
 
-setup:
-	mkdir assembly_outputs
-	mkdir bom
+.PHONY = project clean
+
+project:
+	$(PYTHON) kiproj.py config
+	mkdir $(FOLDERS)
 	touch bom/bom_template.csv
-	mkdir datasheets
-	mkdir docs
-	mkdir fab_outputs
-	mkdir freecad_proj
-	mkdir images
-	mkdir pdf_outputs
-	mkdir software
-	$(PYTHON) setup.py
-
-config:
-	$(PYTHON) config.py
+	$(PYTHON) kiproj.py setup
 
 clean:
-	rm -r assembly_outputs
-	rm -r bom
-	rm -r datasheets
-	rm -r docs
-	rm -r fab_outputs
-	rm -r freecad_proj
-	rm -r images
-	rm -r pdf_outputs
-	rm -r software
+	rm -r $(FOLDERS)
+	$(PYTHON) kiproj.py clean
 	rm config.txt
-
-
