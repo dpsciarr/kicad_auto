@@ -9,7 +9,8 @@ config_file = os.path.join(pwd, "config.txt")
 # KiCAD-specific folders
 kicad_dir = os.path.join(pwd, "kicad_proj/")
 
-
+# BOM file
+bom_file = os.path.join(pwd, "bom/bom_template.csv")
 
 pro_file = os.path.join(kicad_dir, "temp.pro")
 sch_file = os.path.join(kicad_dir, "temp.sch")
@@ -39,7 +40,7 @@ if os.path.exists(sch_file):
                     elif field == "REV":
                         sch_contents=sch_contents.replace("rev", val)
                     elif field == "COMPANY":
-                        sch_contents=sch_contents.replace("comp", val)
+                        sch_contents=sch_contents.replace("company", val)
                     elif field == "COMMENT1":
                         sch_contents=sch_contents.replace("comment1", val)
                     elif field == "COMMENT2":
@@ -68,4 +69,12 @@ if project_name != "temp":
                 print("Renamed:\n\t", os.path.join(kicad_dir, f), " to ", newName)
             except Exception as e:
                 print("Exception:", e)
+    print("Done")
+
+
+if os.path.exists(bom_file):
+    print("Initializing BOM Template")
+    with open(bom_file, 'w') as bom:
+        bom.write("Item #,Designator,Qty.,Description,Manufacturer,Mfr Part Number")
+        bom.close()
     print("Done")
