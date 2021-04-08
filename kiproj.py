@@ -14,31 +14,41 @@ kicad_dir = os.path.join(pwd, "kicad_proj/")
 kicad_proj_symbols_lib_dir = os.path.join(kicad_dir, "libs/symbols/")
 kicad_proj_fp_lib_dir = os.path.join(kicad_dir, "libs/footprints/")
 kicad_proj_models_lib_dir = os.path.join(kicad_dir, "libs/models/")
-kicad_proj_sym_lib_table = os.path.join(kicad_dir, "sym_lib_table")
+kicad_proj_sym_lib_table = os.path.join(kicad_dir, "sym-lib-table")
 
 ###############################################
 # clean()
 ###############################################
 def clean():
     if os.path.exists(config_file):
-        proj_name = "temp"
+        project_name = "temp"
+        project_title = ""
 
         with open(config_file, 'r') as cfg:
-            proj_line = cfg.readlines(1)[0]
-            proj_name = proj_line.split("=")[1][1:-2]
-            
+            lines = cfg.readlines()
+            print(lines)
+            proj_line = lines[0]
+            project_name = proj_line.split("=")[1][1:-2]
+            title_line = lines[1]
+            project_title = title_line.split("=")[1][1:-2]
             cfg.close()
         
-        # KiCAD specific folders
-        pro_file = os.path.join(kicad_dir, f"{proj_name}.pro")
-        sch_file = os.path.join(kicad_dir, f"{proj_name}.sch")
-        pcb_file = os.path.join(kicad_dir, f"{proj_name}.kicad_pcb")
+        # KiCAD specific files
+        pro_file = os.path.join(kicad_dir, f"{project_name}.pro")
+        sch_file = os.path.join(kicad_dir, f"{project_name}.sch")
+        pcb_file = os.path.join(kicad_dir, f"{project_name}.kicad_pcb")
         
-        if proj_name != "temp":
-            print("Renaming folders...")
+        symbol_lib_file = os.path.join(kicad_proj_symbols_lib_dir, f"{project_name}.lib")
+        symbol_dcm_file = os.path.join(kicad_proj_symbols_lib_dir, f"{project_name}.dcm")
+
+        if project_name != "temp":
+            print("Renaming files...")
             os.rename(pro_file, os.path.join(kicad_dir, "temp.pro"))
             os.rename(sch_file, os.path.join(kicad_dir, "temp.sch"))
             os.rename(pcb_file, os.path.join(kicad_dir, "temp.kicad_pcb"))
+
+            os.rename(symbol_lib_file, os.path.join(kicad_proj_symbols_lib_dir, "temp.lib"))
+            os.rename(symbol_dcm_file, os.path.join(kicad_proj_symbols_lib_dir, "temp.dcm"))
 
             print("Done")
 
@@ -73,6 +83,18 @@ def clean():
             sch.write(new_text)
             sch.close()
             print("Done")
+        
+        with open(kicad_proj_sym_lib_table, 'r+') as slt:
+            print("Cleaning Symbol Library Table")
+            slt_contents = slt.read()
+            slt_contents = slt_contents.replace("" + project_name, "PROJECT_NAME")
+            slt_contents = slt_contents.replace(f"descr \"{project_title} Symbol Library\"", "descr \"\"")
+            slt.seek(0)
+            slt.truncate(0)
+            slt.write(slt_contents)
+            slt.close()
+            print("Done")
+
 
 ###############################################
 # setup()
@@ -88,6 +110,7 @@ def setup():
 
     # Initialize project name
     project_name = "temp"
+    project_title = ""
 
     # Configures the .sch file for Title Block population and page settings
     if os.path.exists(sch_file):
@@ -110,6 +133,7 @@ def setup():
                             if field == "PROJECT_NAME" and val != "":
                                 project_name = val
                             elif field == "TITLE":
+                                project_title = val
                                 sch_contents=sch_contents.replace("title", val)
                             elif field == "REV":
                                 sch_contents=sch_contents.replace("rev", val)
@@ -141,7 +165,7 @@ def setup():
                 newName = os.path.join(kicad_dir, project_name + "." + fsplit[1])
                 try:
                     os.rename(os.path.join(kicad_dir, f), newName)
-                    print("Renamed:\n\t", os.path.join(kicad_dir, f), " to ", newName)
+                    print("Renamed:\nOLD:", os.path.join(kicad_dir, f), "\nNEW:", newName)
                 except Exception as e:
                     print("Exception:", e)
 
@@ -160,11 +184,13 @@ def setup():
         print("Done")
     
         # Update sym_lib_table
+        print(kicad_proj_sym_lib_table)
         if os.path.exists(kicad_proj_sym_lib_table):
             print(f"Updating symbol library table with project name {project_name}...")
             with open(kicad_proj_sym_lib_table, 'r+') as slt:
                 slt_contents = slt.read()
                 slt_contents = slt_contents.replace("PROJECT_NAME", project_name)
+                slt_contents = slt_contents.replace("descr \"\"", f"descr \"{project_title} Symbol Library\"")
                 slt.seek(0)
                 slt.truncate(0)
                 slt.write(slt_contents)
@@ -184,12 +210,12 @@ def setup():
 # config()
 ###############################################
 def config():
-    project_name = input("Project Name: ")
-    title = input("Title: ")
-    rev = input("Revision: ")
-    company = input("Company Name: ")
-    sheet1 = input("Sheet 1: ")
-    date = input("Date (YYYY-MM-DD): ")
+    project_name = "P-001" #input("Project Name: ")
+    title = "PROTIS 1" #input("Title: ")
+    rev = "0" #input("Revision: ")
+    company = "Mimmotronics" #input("Company Name: ")
+    sheet1 = "Overview" #input("Sheet 1: ")
+    date = "2021-04-08" #input("Date (YYYY-MM-DD): ")
 
     with open(config_file, 'w') as cfg:
         cfg.write(f"PROJECT_NAME='{project_name}'\n")
