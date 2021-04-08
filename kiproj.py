@@ -15,6 +15,7 @@ kicad_proj_symbols_lib_dir = os.path.join(kicad_dir, "libs/symbols/")
 kicad_proj_fp_lib_dir = os.path.join(kicad_dir, "libs/footprints/")
 kicad_proj_models_lib_dir = os.path.join(kicad_dir, "libs/models/")
 kicad_proj_sym_lib_table = os.path.join(kicad_dir, "sym-lib-table")
+kicad_proj_fp_lib_table = os.path.join(kicad_dir, "fp-lib-table")
 
 ###############################################
 # clean()
@@ -26,7 +27,6 @@ def clean():
 
         with open(config_file, 'r') as cfg:
             lines = cfg.readlines()
-            print(lines)
             proj_line = lines[0]
             project_name = proj_line.split("=")[1][1:-2]
             title_line = lines[1]
@@ -40,15 +40,22 @@ def clean():
         
         symbol_lib_file = os.path.join(kicad_proj_symbols_lib_dir, f"{project_name}.lib")
         symbol_dcm_file = os.path.join(kicad_proj_symbols_lib_dir, f"{project_name}.dcm")
+        
+        fp_pretty_dir = os.path.join(kicad_proj_fp_lib_dir, f"{project_name}.pretty")
 
         if project_name != "temp":
             print("Renaming files...")
+            # Rename main application files
             os.rename(pro_file, os.path.join(kicad_dir, "temp.pro"))
             os.rename(sch_file, os.path.join(kicad_dir, "temp.sch"))
             os.rename(pcb_file, os.path.join(kicad_dir, "temp.kicad_pcb"))
 
+            # Rename project symbol library files
             os.rename(symbol_lib_file, os.path.join(kicad_proj_symbols_lib_dir, "temp.lib"))
             os.rename(symbol_dcm_file, os.path.join(kicad_proj_symbols_lib_dir, "temp.dcm"))
+
+            # Rename project .pretty folder
+            os.rename(fp_pretty_dir, os.path.join(kicad_proj_fp_lib_dir, "temp.pretty"))
 
             print("Done")
 
@@ -85,14 +92,25 @@ def clean():
             print("Done")
         
         with open(kicad_proj_sym_lib_table, 'r+') as slt:
-            print("Cleaning Symbol Library Table")
+            print("Cleaning symbol library table...")
             slt_contents = slt.read()
-            slt_contents = slt_contents.replace("" + project_name, "PROJECT_NAME")
+            slt_contents = slt_contents.replace(f"{project_name}", "PROJECT_NAME")
             slt_contents = slt_contents.replace(f"descr \"{project_title} Symbol Library\"", "descr \"\"")
             slt.seek(0)
             slt.truncate(0)
             slt.write(slt_contents)
             slt.close()
+            print("Done")
+        
+        with open(kicad_proj_fp_lib_table, 'r+') as flt:
+            print("Cleaning footprint library table...")
+            flt_contents = flt.read()
+            flt_contents = flt_contents.replace(f"{project_name}", "PROJECT_NAME")
+            flt_contents = flt_contents.replace(f"descr \"{project_title} Footprint Library\"", "descr \"\"")
+            flt.seek(0)
+            flt.truncate(0)
+            flt.write(flt_contents)
+            flt.close()
             print("Done")
 
 
@@ -107,6 +125,7 @@ def setup():
     pro_file = os.path.join(kicad_dir, "temp.pro")
     sch_file = os.path.join(kicad_dir, "temp.sch")
     pcb_file = os.path.join(kicad_dir, "temp.kicad_pcb")
+    pretty_dir = os.path.join(kicad_proj_fp_lib_dir, "temp.pretty")
 
     # Initialize project name
     project_name = "temp"
@@ -180,11 +199,18 @@ def setup():
                     print("Renamed:\nOLD:", os.path.join(kicad_proj_symbols_lib_dir, f), "\nNEW:", newName)
                 except Exception as e:
                     print("Exception:", e)
+        print("Done")
 
+        print("Renaming .pretty")
+        try:
+            newPrettyDir = pretty_dir.replace("temp.pretty", f"{project_name}.pretty")
+            os.rename(pretty_dir, newPrettyDir)
+            print("Renamed:\nOLD:", pretty_dir, "\nNEW:", newPrettyDir)
+        except Exception as e:
+            print("Exception:", e)
         print("Done")
     
         # Update sym_lib_table
-        print(kicad_proj_sym_lib_table)
         if os.path.exists(kicad_proj_sym_lib_table):
             print(f"Updating symbol library table with project name {project_name}...")
             with open(kicad_proj_sym_lib_table, 'r+') as slt:
@@ -195,6 +221,19 @@ def setup():
                 slt.truncate(0)
                 slt.write(slt_contents)
                 slt.close()
+            print("Done")
+        
+        # Update fp_lib_table
+        if os.path.exists(kicad_proj_fp_lib_table):
+            print(f"Updating footprint library table with project name {project_name}...")
+            with open(kicad_proj_fp_lib_table, 'r+') as flt:
+                flt_contents = flt.read()
+                flt_contents = flt_contents.replace("PROJECT_NAME", project_name)
+                flt_contents = flt_contents.replace("descr \"\"", f"descr \"{project_title} Footprint Library\"")
+                flt.seek(0)
+                flt.truncate(0)
+                flt.write(flt_contents)
+                flt.close()
             print("Done")
 
 
