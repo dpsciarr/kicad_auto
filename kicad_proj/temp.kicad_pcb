@@ -4,7 +4,7 @@
     (title "PROJECT_TITLE")
     (date DATE)
     (rev REV)
-    (company COMPANY)
+    (company "COMPANY")
     (comment 1 "COMMENT1")
     (comment 2 "COMMENT2")
     (comment 3 "COMMENT3")

@@ -109,15 +109,15 @@ def clean():
                     elif "(rev " in line:
                         new_text += "    (rev REV)\n"
                     elif "(company " in line:
-                        new_text += "    (company COMPANY)\n"
+                        new_text += "    (company \"COMPANY\")\n"
                     elif "(comment 1 \"" in line:
-                        new_text += "    (comment 1 \"COMMENT1\""
+                        new_text += "    (comment 1 \"COMMENT1\")\n"
                     elif "(comment 2 \"" in line:
-                        new_text += "    (comment 2 \"COMMENT2\""
+                        new_text += "    (comment 2 \"COMMENT2\")\n"
                     elif "(comment 3 \"" in line:
-                        new_text += "    (comment 3 \"COMMENT3\""
+                        new_text += "    (comment 3 \"COMMENT3\")\n"
                     elif "(comment 4 \"" in line:
-                        new_text += "    (comment 4 \"COMMENT4\""
+                        new_text += "    (comment 4 \"COMMENT4\")\n"
                     else:
                         new_text += (line+"\n")
             pcb.seek(0)
