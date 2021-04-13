@@ -1,8 +1,8 @@
 README
 
-## KiCAD Project Builder
+## KiCad Project Builder
 
-KiCAD Auto (KiCAD Project Builder) is a semi-automatic build tool for instantiating KiCAD projects. The tool takes in some basic project parameters from command line inputs, configures a title block, and creates a usable directory structure for a KiCAD project.
+KiCad Auto (KiCad Project Builder) is a semi-automatic build tool for instantiating KiCad projects. The tool takes in some basic project parameters from command line inputs, configures a title block, and creates a usable directory structure for a KiCad project.
 
 **NOTE:** *THIS HAS ONLY BEEN TESTED WITH THE FOLLOWING KICAD/OS VERSIONS:*
 
