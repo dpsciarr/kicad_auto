@@ -10,7 +10,6 @@
     (comment 3 "COMMENT3")
     (comment 4 "COMMENT4")
   )
-
   (layers
     (0 F.Cu signal)
     (31 B.Cu signal)
