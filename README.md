@@ -83,6 +83,7 @@ Once the parameters are populated, the program will build the directory structur
 ├── makefile
 ├── pdf_outputs
 ├── README.md
+├── simulation
 └── software
 ```
 
@@ -145,6 +146,10 @@ The entire KiCAD project sits in this directory (with the exception of global co
 ### PDF Outputs
 
 PDF drawings specific to this project, exported from either KiCAD or FreeCAD.
+
+### Simulation
+
+Stores simulation files. Circuit simulation, heat transfer, etc.
 
 ### Software
 
