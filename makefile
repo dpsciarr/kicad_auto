@@ -1,6 +1,6 @@
 PYTHON = python3
 
-FOLDERS = assembly_outputs bom datasheets docs fab_outputs freecad_outputs images pdf_outputs software
+FOLDERS = assembly_outputs bom datasheets docs fab_outputs freecad_outputs images pdf_outputs sim software
 
 .PHONY = project clean
 
